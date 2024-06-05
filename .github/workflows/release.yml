@@ -3,7 +3,7 @@ name: Create Release
 on:
   push:
     branches:
-      - 'main'  
+      - 'main'
 
 jobs:
   release:
@@ -13,14 +13,20 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
+    - name: Get the version from the commit or tag
+      id: get_version
+      run: |
+        VERSION=$(git describe --tags --abbrev=0 || echo "v0.0.0")
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
+        tag_name: ${{ env.VERSION }}
+        release_name: Release ${{ env.VERSION }}
         draft: false
         prerelease: false
         body: |
