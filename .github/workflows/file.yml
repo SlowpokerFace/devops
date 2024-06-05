@@ -29,5 +29,5 @@ name: Log in to Docker Hub
     
 name: Build and push Docker image
     run: |
-      docker build -t ${{ secrets.DOCKER_USERNAME }}/cat_html:latest .
-      docker push ${{ secrets.DOCKER_USERNAME }}/cat_html:latest
+      docker build -t ${{ secrets.DOCKER_USERNAME }}/devops:latest .
+      docker push ${{ secrets.DOCKER_USERNAME }}/devops:latest
