@@ -56,3 +56,5 @@ jobs:
         git config --global user.email 'github-actions@github.com'
         git tag ${{ env.NEW_VERSION }}
         git push origin ${{ env.NEW_VERSION }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
