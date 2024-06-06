@@ -13,22 +13,46 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Get the version from the commit or tag
+    - name: Get the latest version
       id: get_version
       run: |
         VERSION=$(git describe --tags --abbrev=0 || echo "v0.0.0")
+        echo "Latest version: $VERSION"
         echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+    - name: Calculate new version
+      id: calc_new_version
+      run: |
+        VERSION=${{ env.VERSION }}
+        if [[ $VERSION == v* ]]; then
+          VERSION=${VERSION:1}
+        fi
+        IFS='.' read -r -a VERSION_PARTS <<< "$VERSION"
+        MAJOR=${VERSION_PARTS[0]}
+        MINOR=${VERSION_PARTS[1]}
+        PATCH=${VERSION_PARTS[2]}
+        PATCH=$((PATCH + 1))
+        NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
+        echo "New version: $NEW_VERSION"
+        echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
 
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ env.VERSION }}
-        release_name: Release ${{ env.VERSION }}
+        tag_name: ${{ env.NEW_VERSION }}
+        release_name: Release ${{ env.NEW_VERSION }}
         draft: false
         prerelease: false
         body: |
           ## Changes
           - Your changelog here
+
+    - name: Push new tag
+      run: |
+        git config --global user.name 'github-actions'
+        git config --global user.email 'github-actions@github.com'
+        git tag ${{ env.NEW_VERSION }}
+        git push origin ${{ env.NEW_VERSION }}
